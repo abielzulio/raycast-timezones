@@ -1,10 +1,31 @@
 import { List } from "@raycast/api"
 import { useState } from "react"
-import { useTimezoneSearch } from "../hooks/useTimezoneSearch"
+import { environment } from "@raycast/api"
+import { useSQL } from "@raycast/utils"
+import path from "path"
+
+interface Timezone {
+  zone_name: string
+  country_code: string
+  abbreviation: string
+  time_start: number
+  gmt_offset: number
+  dst: number
+}
 
 export default function Command() {
   const [searchText, setSearchText] = useState<string>()
-  const { data, isLoading, permissionView } = useTimezoneSearch(searchText)
+  const defaultQuery = `SELECT * FROM 'time_zone' LIMIT 0,100`
+  const { data, isLoading, permissionView } = useSQL<Timezone>(
+    path.join(environment.assetsPath, "data.sqlite"),
+    !searchText
+      ? defaultQuery
+      : `SELECT * FROM 'time_zone' 
+        WHERE zone_name LIKE '%${searchText}%'
+          OR country_code LIKE '%${searchText}%'
+          OR abbreviation LIKE '%${searchText}%'
+        `
+  )
 
   const formatting = (zoneName: string) => {
     return `${zoneName.split("/")[1].replace("_", " ")}, ${
@@ -19,7 +40,6 @@ export default function Command() {
   return (
     <List
       isLoading={isLoading}
-      searchText={searchText}
       onSearchTextChange={setSearchText}
       throttle={true}
     >
