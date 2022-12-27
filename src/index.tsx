@@ -15,11 +15,10 @@ interface Timezone {
 
 export default function Command() {
   const [searchText, setSearchText] = useState<string>()
-  const defaultQuery = `SELECT * FROM 'time_zone' LIMIT 0,100`
   const { data, isLoading, permissionView } = useSQL<Timezone>(
     path.join(environment.assetsPath, "data.sqlite"),
     !searchText
-      ? defaultQuery
+      ? `SELECT * FROM 'time_zone' LIMIT 0,100`
       : `SELECT * FROM 'time_zone' 
         WHERE zone_name LIKE '%${searchText}%'
           OR country_code LIKE '%${searchText}%'
