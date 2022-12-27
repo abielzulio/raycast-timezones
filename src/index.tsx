@@ -47,6 +47,17 @@ export default function Command() {
           key={id}
           title={formatting(item.zone_name)}
           subtitle={item.abbreviation}
+          accessories={[
+            {
+              text: `${new Date(Date.now() + item.gmt_offset * 1000)
+                .getUTCHours()
+                .toLocaleString()}:${new Date(
+                Date.now() + item.gmt_offset * 1000
+              )
+                .getUTCMinutes()
+                .toLocaleString()}`,
+            },
+          ]}
         />
       ))}
     </List>
