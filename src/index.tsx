@@ -61,7 +61,7 @@ export default function Command() {
   }, [savedTimezones])
 
   const formatZone = (zoneName: string) => {
-    return `${zoneName.split("/")[1].replace("_", " ")}, ${
+    return `${zoneName.split("/")[1].replaceAll("_", " ")}, ${
       zoneName.split("/")[0]
     }`
   }
