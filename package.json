@@ -19,6 +19,15 @@
       "mode": "view"
     }
   ],
+  "preferences": [
+    {
+      "name": "isHour12",
+      "description": "Enable AM/PM time format",
+      "type": "checkbox",
+      "title": "AM/PM",
+      "required": false
+    }
+  ],
   "dependencies": {
     "@fast-csv/parse": "^4.3.6",
     "@raycast/api": "^1.45.2",

@@ -1,4 +1,4 @@
-import { List } from "@raycast/api"
+import { getPreferenceValues, List } from "@raycast/api"
 import { useState } from "react"
 import { environment } from "@raycast/api"
 import { useSQL } from "@raycast/utils"
@@ -15,6 +15,9 @@ interface Timezone {
 
 export default function Command() {
   const [searchText, setSearchText] = useState<string>()
+  const [isHour12] = useState(() => {
+    return getPreferenceValues<{ isHour12: boolean }>().isHour12
+  })
   const { data, isLoading, permissionView } = useSQL<Timezone>(
     path.join(environment.assetsPath, "data.sqlite"),
     !searchText
@@ -49,13 +52,13 @@ export default function Command() {
           subtitle={item.abbreviation}
           accessories={[
             {
-              text: `${new Date(Date.now() + item.gmt_offset * 1000)
-                .getUTCHours()
-                .toLocaleString()}:${new Date(
+              text: `${new Date(
                 Date.now() + item.gmt_offset * 1000
-              )
-                .getUTCMinutes()
-                .toLocaleString()}`,
+              ).toLocaleTimeString("en", {
+                timeStyle: "short",
+                hour12: isHour12,
+                timeZone: "UTC",
+              })}`,
             },
           ]}
         />
