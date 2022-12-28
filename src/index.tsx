@@ -34,10 +34,10 @@ export default function Command() {
     !searchText
       ? `SELECT * FROM 'time_zone' LIMIT 0,100`
       : `SELECT * FROM 'time_zone' 
-        WHERE zone_name LIKE '%${searchText}%'
+        WHERE zone_name LIKE '%${searchText.replaceAll(" ", "_")}%'
           OR country_code LIKE '%${searchText}%'
           OR abbreviation LIKE '%${searchText}%'
-        LIMIT 0,100`
+        LIMIT 0,10000`
   )
 
   useEffect(() => {
