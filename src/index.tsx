@@ -195,54 +195,59 @@ export default function Command() {
       )}
       {searchText && (
         <List.Section title="All Timezones">
-          {data?.map((item, id) => {
-            const time = formatTime(item.gmt_offset)
-            return (
-              <List.Item
-                key={id}
-                title={formatZone(item.zone_name)}
-                subtitle={item.abbreviation}
-                accessories={itemAccessories(time)}
-                actions={
-                  <ActionPanel>
-                    <ActionPanel.Section title="Result">
-                      <Action.CopyToClipboard
-                        icon={Icon.CopyClipboard}
-                        title="Copy Time"
-                        shortcut={{ modifiers: ["cmd"], key: "c" }}
-                        content={time!}
-                      />
-                      <Action.CopyToClipboard
-                        icon={Icon.CopyClipboard}
-                        title="Copy Abbreviation"
-                        shortcut={{ modifiers: ["cmd", "ctrl"], key: "c" }}
-                        content={item.abbreviation}
-                      />
-                      <Action.CopyToClipboard
-                        icon={Icon.CopyClipboard}
-                        title="Copy Time and Abbreviation"
-                        shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
-                        content={`${time} ${item.abbreviation}`}
-                      />
-                      <Action
-                        title="Save Timezone"
-                        shortcut={{ modifiers: ["cmd"], key: "s" }}
-                        icon={Icon.Star}
-                        onAction={() => handleSaveTimezone(item)}
-                      />
-                    </ActionPanel.Section>
-                    <ActionPanel.Section title="Preferences">
-                      <Action
-                        icon={Icon.Gear}
-                        title="Open Extension Preferences"
-                        onAction={openExtensionPreferences}
-                      />
-                    </ActionPanel.Section>
-                  </ActionPanel>
-                }
-              />
+          {data
+            ?.filter(
+              (v, i, a) =>
+                a.findIndex((v2) => v2.gmt_offset === v.gmt_offset) === i
             )
-          })}
+            .map((item, id) => {
+              const time = formatTime(item.gmt_offset)
+              return (
+                <List.Item
+                  key={id}
+                  title={formatZone(item.zone_name)}
+                  subtitle={item.abbreviation}
+                  accessories={itemAccessories(time)}
+                  actions={
+                    <ActionPanel>
+                      <ActionPanel.Section title="Result">
+                        <Action.CopyToClipboard
+                          icon={Icon.CopyClipboard}
+                          title="Copy Time"
+                          shortcut={{ modifiers: ["cmd"], key: "c" }}
+                          content={time!}
+                        />
+                        <Action.CopyToClipboard
+                          icon={Icon.CopyClipboard}
+                          title="Copy Abbreviation"
+                          shortcut={{ modifiers: ["cmd", "ctrl"], key: "c" }}
+                          content={item.abbreviation}
+                        />
+                        <Action.CopyToClipboard
+                          icon={Icon.CopyClipboard}
+                          title="Copy Time and Abbreviation"
+                          shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+                          content={`${time} ${item.abbreviation}`}
+                        />
+                        <Action
+                          title="Save Timezone"
+                          shortcut={{ modifiers: ["cmd"], key: "s" }}
+                          icon={Icon.Star}
+                          onAction={() => handleSaveTimezone(item)}
+                        />
+                      </ActionPanel.Section>
+                      <ActionPanel.Section title="Preferences">
+                        <Action
+                          icon={Icon.Gear}
+                          title="Open Extension Preferences"
+                          onAction={openExtensionPreferences}
+                        />
+                      </ActionPanel.Section>
+                    </ActionPanel>
+                  }
+                />
+              )
+            })}
         </List.Section>
       )}
     </List>
