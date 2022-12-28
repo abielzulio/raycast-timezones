@@ -8,7 +8,6 @@ import {
   Icon,
   List,
   LocalStorage,
-  openExtensionPreferences,
   showToast,
   Toast,
 } from "@raycast/api"
@@ -16,15 +15,19 @@ import { useSQL } from "@raycast/utils"
 import { randomUUID } from "crypto"
 import path from "path"
 import { useCallback, useEffect, useState } from "react"
+import { CopyActions, PreferencesAction } from "./actions"
 import type { SavedTimezone, Timezone } from "./type"
+import { formatTime, formatZone } from "./utils"
 
 export default function Command() {
   const [searchText, setSearchText] = useState<string>()
   const [isLoading, setLoading] = useState<boolean>(true)
   const [savedTimezones, setSavedTimezones] = useState<SavedTimezone[]>([])
+
   const [isHour12] = useState(() => {
     return getPreferenceValues<{ isHour12: boolean }>().isHour12
   })
+
   const {
     data,
     isLoading: isSQLLoading,
@@ -59,20 +62,6 @@ export default function Command() {
   useEffect(() => {
     LocalStorage.setItem("savedTimezones", JSON.stringify(savedTimezones))
   }, [savedTimezones])
-
-  const formatZone = (zoneName: string) => {
-    return `${zoneName.split("/")[1].replaceAll("_", " ")}, ${
-      zoneName.split("/")[0]
-    }`
-  }
-
-  const formatTime = (offset: number): string => {
-    return `${new Date(Date.now() + offset * 1000).toLocaleTimeString("en", {
-      timeStyle: "short",
-      hour12: isHour12,
-      timeZone: "UTC",
-    })}`
-  }
 
   const handleSaveTimezone = useCallback(
     async (timezone: Timezone) => {
@@ -130,7 +119,7 @@ export default function Command() {
           {savedTimezones
             ?.sort((a, b) => b.saved_at - a.saved_at)
             .map(({ id, zone_name, abbreviation, gmt_offset }) => {
-              const time = formatTime(gmt_offset)
+              const time = formatTime(gmt_offset, isHour12)
               return (
                 <List.Item
                   key={id}
@@ -139,33 +128,8 @@ export default function Command() {
                   accessories={itemAccessories(time)}
                   actions={
                     <ActionPanel>
-                      <ActionPanel.Section title="Copy">
-                        <Action.CopyToClipboard
-                          icon={Icon.CopyClipboard}
-                          title="Copy Time"
-                          shortcut={{ modifiers: ["cmd"], key: "c" }}
-                          content={time!}
-                        />
-                        <Action.CopyToClipboard
-                          icon={Icon.CopyClipboard}
-                          title="Copy Abbreviation"
-                          shortcut={{ modifiers: ["cmd", "ctrl"], key: "c" }}
-                          content={abbreviation}
-                        />
-                        <Action.CopyToClipboard
-                          icon={Icon.CopyClipboard}
-                          title="Copy Time and Abbreviation"
-                          shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
-                          content={`${time} ${abbreviation}`}
-                        />
-                      </ActionPanel.Section>
-                      <ActionPanel.Section title="Preferences">
-                        <Action
-                          icon={Icon.Gear}
-                          title="Open Extension Preferences"
-                          onAction={openExtensionPreferences}
-                        />
-                      </ActionPanel.Section>
+                      <CopyActions time={time} abbr={abbreviation} />
+                      <PreferencesAction />
                       <ActionPanel.Section title="Remove">
                         <Action
                           style={Action.Style.Destructive}
@@ -201,7 +165,7 @@ export default function Command() {
                 a.findIndex((v2) => v2.gmt_offset === v.gmt_offset) === i
             )
             .map((item, id) => {
-              const time = formatTime(item.gmt_offset)
+              const time = formatTime(item.gmt_offset, isHour12)
               return (
                 <List.Item
                   key={id}
@@ -210,25 +174,8 @@ export default function Command() {
                   accessories={itemAccessories(time)}
                   actions={
                     <ActionPanel>
-                      <ActionPanel.Section title="Result">
-                        <Action.CopyToClipboard
-                          icon={Icon.CopyClipboard}
-                          title="Copy Time"
-                          shortcut={{ modifiers: ["cmd"], key: "c" }}
-                          content={time!}
-                        />
-                        <Action.CopyToClipboard
-                          icon={Icon.CopyClipboard}
-                          title="Copy Abbreviation"
-                          shortcut={{ modifiers: ["cmd", "ctrl"], key: "c" }}
-                          content={item.abbreviation}
-                        />
-                        <Action.CopyToClipboard
-                          icon={Icon.CopyClipboard}
-                          title="Copy Time and Abbreviation"
-                          shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
-                          content={`${time} ${item.abbreviation}`}
-                        />
+                      <CopyActions time={time} abbr={item.abbreviation} />
+                      <ActionPanel.Section title="Save">
                         <Action
                           title="Save Timezone"
                           shortcut={{ modifiers: ["cmd"], key: "s" }}
@@ -236,13 +183,7 @@ export default function Command() {
                           onAction={() => handleSaveTimezone(item)}
                         />
                       </ActionPanel.Section>
-                      <ActionPanel.Section title="Preferences">
-                        <Action
-                          icon={Icon.Gear}
-                          title="Open Extension Preferences"
-                          onAction={openExtensionPreferences}
-                        />
-                      </ActionPanel.Section>
+                      <PreferencesAction />
                     </ActionPanel>
                   }
                 />
